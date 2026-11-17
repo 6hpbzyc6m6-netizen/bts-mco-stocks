@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#173e35" />
+    <meta
+      name="description"
+      content="Apprenez et comparez les méthodes de valorisation des stocks : CUMP et PEPS. Simulateur gratuit pour le BTS MCO."
+    />
+    <title>StockLab — BTS MCO</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script defer src="./engine.js"></script>
+    <script defer src="./scenarios.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./index.html"
+        ><span class="logo">S<span>↗</span></span
+        ><span
+          >Stock<span class="brand-light">Lab</span
+          ><small>LE LABORATOIRE DE GESTION</small></span
+        ></a
+      ><span class="course"
+        >BTS MCO <span> / </span> Gestion opérationnelle</span
+      >
+      <div class="mode-switch" role="group" aria-label="Mode d’utilisation">
+        <button data-mode="student" aria-pressed="true">Étudiant</button
+        ><button data-mode="teacher" aria-pressed="false">Enseignant</button>
+      </div>
+    </header>
+    <div class="layout">
+      <aside>
+        <div class="aside-label">VOTRE ESPACE DE TRAVAIL</div>
+        <nav aria-label="Navigation principale">
+          <button data-view="dashboard" class="active">
+            <span>◫</span> Tableau de bord</button
+          ><button data-view="movements">
+            <span>⇄</span> Mouvements <b id="movement-count">5</b>
+          </button>
+          <div class="aside-label methods-label">VALORISER LES STOCKS</div>
+          <button data-view="moving"><span>01</span> CUMP après entrée</button
+          ><button data-view="period">
+            <span>02</span> CUMP fin de période</button
+          ><button data-view="fifo"><span>03</span> PEPS / FIFO</button
+          ><button data-view="compare">
+            <span>▥</span> Comparer les méthodes</button
+          ><button data-view="practice"><span>✎</span> S’entraîner</button>
+        </nav>
+        <div class="aside-note">
+          <span class="note-icon">✦</span
+          ><strong>Comprendre en pratiquant.</strong>
+          <p>
+            Un même scénario, trois méthodes. À vous d’explorer les différences.
+          </p>
+          <span class="local-status" id="save-status"
+            >● Sauvegarde locale active</span
+          >
+        </div>
+        <p class="aside-footer">
+          Sans compte. Sans installation.<br />Conçu pour apprendre.
+        </p>
+      </aside>
+      <main id="main" tabindex="-1">
+        <div class="breadcrumb">
+          Gestion des stocks <span>/</span>
+          <span id="breadcrumb-current">Tableau de bord</span>
+        </div>
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">APPRENDRE · PRATIQUER · COMPARER</div>
+            <h1 id="page-title">Les stocks, en clair.</h1>
+            <p id="page-subtitle">
+              Explorez les méthodes de valorisation à partir d’un cas concret.
+            </p>
+          </div>
+          <button id="print" class="button secondary">↗ Imprimer / PDF</button>
+        </div>
+        <div id="notice" role="status" aria-live="polite"></div>
+        <section class="scenario-bar" aria-label="Scénario actif">
+          <div class="scenario-icon">▣</div>
+          <div class="scenario-info">
+            <span class="eyebrow">SCÉNARIO ACTIF</span
+            ><strong id="scenario-name"></strong
+            ><small id="scenario-description"></small>
+          </div>
+          <label class="scenario-select"
+            >Charger un exercice<select id="scenario-picker">
+              <option value="0">SPORTÉO · Niveau BTS MCO</option>
+              <option value="1">01 · Débutant</option>
+              <option value="2">02 · Intermédiaire</option>
+            </select></label
+          ><span class="tag" id="level-tag">BTS MCO</span>
+        </section>
+        <div id="content"></div>
+        <footer class="main-footer">
+          <span
+            >StockLab <span>·</span> Un outil pédagogique pour le BTS MCO</span
+          ><span>Montants HT · Quantités en unités</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="movement-dialog">
+      <form id="movement-form">
+        <div class="eyebrow">VOTRE SCÉNARIO</div>
+        <h2 id="dialog-title">Ajouter un mouvement</h2>
+        <input type="hidden" id="edit-index" /><label
+          >Nature<select id="type" required>
+            <option value="purchase">Achat / entrée</option>
+            <option value="out">Sortie</option>
+            <option value="initial">Stock initial</option>
+          </select></label
+        ><label>Date<input type="date" id="date" required /></label
+        ><label
+          >Quantité<input
+            type="number"
+            id="qty"
+            min="0"
+            max="1000000000"
+            step="1"
+            required /></label
+        ><label id="cost-label"
+          >Coût unitaire HT (€)<input
+            type="number"
+            id="cost"
+            min="0"
+            max="1000000000"
+            step="any"
+            required
+        /></label>
+        <p id="form-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button type="button" id="cancel" class="button secondary">
+            Annuler</button
+          ><button type="submit" class="button primary">Enregistrer</button>
+        </div>
+      </form>
+    </dialog>
+    <input
+      type="file"
+      id="import-file"
+      accept="application/json,.json"
+      hidden
+    />
+  </body>
+</html>
