@@ -1307,3 +1307,77 @@ dialog .actions {
     break-inside: avoid;
   }
 }
+
+.calculator {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.calculator h3 {
+  font-size: 15px;
+}
+.calculator label {
+  font-size: 11px;
+  font-weight: 600;
+}
+.calculator input {
+  width: 100%;
+  margin-top: 6px;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.calculator output {
+  display: block;
+  min-height: 36px;
+  text-align: right;
+  font-size: 23px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  padding-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.calculator .error {
+  font-size: 11px;
+  margin: 4px 0 10px;
+}
+.calculator-keys {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.calculator-keys button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 9px;
+  background: #f5f7f0;
+  color: var(--ink);
+  font-size: 16px;
+  min-height: 42px;
+}
+.calculator-keys button:hover {
+  background: #e5ecd9;
+}
+.calculator-keys .calc-equals {
+  background: var(--ink);
+  color: white;
+}
+.calculator-keys .calc-equals:hover {
+  background: var(--green);
+}
+.calculator .button {
+  width: 100%;
+}
+@media (max-width: 1200px) {
+  .statement:has(.calculator) {
+    max-height: none;
+  }
+  .calculator {
+    max-width: 360px;
+  }
+}
+@media print {
+  .calculator {
+    display: none !important;
+  }
+}

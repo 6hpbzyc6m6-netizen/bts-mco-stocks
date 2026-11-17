@@ -48,6 +48,7 @@ function app() {
     document,
     window: { scrollTo() {} },
     StockEngine: require("../engine.js"),
+    StockCalculator: require("../calculator.js"),
     StockScenarios: require("../scenarios.js"),
     localStorage: {
       getItem: () => null,
@@ -134,4 +135,23 @@ test("Parcours : débutant par défaut, énoncé et boutons à chaque étape de 
     assert.match(html, /Étape précédente/);
     assert.match(html, /aria-current="step"/);
   }
+});
+
+test("Calculatrice : résultat et réponses conservés pendant la navigation", () => {
+  const a = app();
+  a.click({ view: "practice" });
+  a.nodes.set("#answers-form", {
+    values: { finalQty: "18", "moving-value": "144" },
+  });
+  a.node("#calculator-input").value = "(400+260)/60";
+  a.click({ calc: "equals" });
+  assert.equal(a.node("#calculator-result").textContent, "11");
+  a.click({ view: "fifo" });
+  assert.equal(a.read("answers.finalQty"), "18");
+  assert.equal(a.read("calculator.result"), 11);
+  assert.match(a.node("#content").innerHTML, /value="\(400\+260\)\/60"/);
+  a.node("#calculator-input").value = "1/0";
+  a.click({ calc: "equals" });
+  assert.match(a.node("#calculator-error").textContent, /zéro/);
+  assert.equal(a.read("calculator.result"), null);
 });
