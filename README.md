@@ -11,11 +11,17 @@ Ouvrir `index.html` directement dans un navigateur récent, y compris hors conne
 - **Fiches** : entrées, sorties et stock restant en quantité, coût unitaire et valeur. PEPS détaille les lots avant, utilisés et après chaque sortie, avec un numéro et une couleur constants.
 - **Comparaison** : stock final, coût des sorties, écarts par rapport au CUMP mobile, marge brute et graphique de valeur du stock final.
 - **Étudiant** (par défaut) : résultats masqués ; saisir les sept réponses dans « S'entraîner ». Les erreurs donnent une piste de calcul. Une réussite complète révèle les fiches. La correction peut aussi être consultée volontairement, sans valider la progression.
-- **Enseignant** : corrections immédiatement visibles, scénarios libres et exercices prédéfinis. Ce mode est accessible sans authentification et ne protège aucun contenu.
+- **Enseignant** : corrections immédiatement visibles, scénarios libres et exercices prédéfinis. L’ouverture demande le mot de passe pédagogique `MCO1234`, défini dans `app.js`. Il doit être ressaisi après un retour au mode étudiant ou un rechargement. Il n’est jamais sauvegardé dans le navigateur. Ce verrou côté client ne protège pas les corrections contre l’inspection des sources.
 - **Parcours** : exercice 01 débutant (coûts identiques), exercice 02 intermédiaire (coûts variables), puis SPORTÉO niveau BTS. Pour valider un exercice, répondre correctement en mode étudiant avant de révéler la correction ; le scénario doit être celui d'origine. Recharger l'exercice permet une nouvelle tentative.
 - **Sauvegarde** : scénario actif et progression dans `localStorage`. Les réponses, le mode et la révélation des corrections ne sont pas persistés. Si le stockage est bloqué, l'application reste utilisable et signale la nécessité d'exporter. Les données dépendent du navigateur et de l'adresse utilisés ; ne pas compter sur leur transfert entre un fichier local et GitHub Pages.
 - **JSON** : importer / exporter depuis Mouvements ; les données importées sont validées avant remplacement. Limites : 500 Ko, 500 mouvements, quantités entières de 0 (stock initial) ou 1 à 1 milliard, coûts et prix de 0 à 1 milliard d'euros. Pour les scénarios courants de BTS, ces plafonds sont largement suffisants.
 - **Impression / PDF** : utiliser le bouton puis sélectionner une imprimante ou « Enregistrer au format PDF ». La vue courante est imprimée ; l'entraînement corrigé regroupe les trois fiches. Les résultats masqués restent masqués à l'impression. Pour une fiche très large, choisir le format paysage.
+
+## Parcours guidé
+
+L’accueil mène à quatre étapes : lire l’énoncé, comprendre les méthodes, calculer et vérifier, comparer et conclure. Des boutons précédent / suivant et une barre de progression permettent de se repérer. Le premier exercice chargé en l’absence de sauvegarde est le niveau débutant.
+
+L’énoncé est affiché à côté des méthodes et de la saisie des réponses (au-dessus sur petit écran). Chaque méthode dispose de repères de calcul. Dans l’étape de saisie, une aide permet de revoir les formules sans quitter les réponses. Celles-ci sont conservées en mémoire lors des changements de vue ; elles restent réinitialisées si le scénario ou le mode change. Rien n’est transmis au professeur.
 
 ## Calculs
 
@@ -74,9 +80,10 @@ Dépôt cible uniquement : https://github.com/6hpbzyc6m6-netizen/bts-mco-stocks
 - `scenarios.js` : trois exercices prédéfinis.
 - `app.js` : rendu, deux modes, corrections, import/export et persistance.
 - `tests/engine.test.cjs` : tests automatisés du moteur.
+- `tests/interface.test.cjs` : tests des événements de verrouillage, du parcours et de la conservation des réponses (DOM simulé, sans contrôle visuel).
 - `package.json`, `scripts/serve.cjs` : commandes de tests et serveur local facultatif.
 - `.github/workflows/tests.yml`, `.nojekyll` : vérifications GitHub et compatibilité Pages.
 
 ## Limites et données
 
-Quantités entières uniquement ; pas de retours, pertes, TVA, ventes à prix multiples ni valorisation LIFO. Dates en ordre chronologique et pas de fuseaux horaires dans les calculs. Les couleurs de lots sont réutilisées après six lots ; leur numéro distingue toujours les lots. Les exercices ne sont pas un examen sécurisé : les corrections sont présentes côté client et le mode enseignant est libre. Aucun suivi étudiant distant ni export de notes. Le navigateur contrôle le rendu PDF final et la persistance des fichiers ouverts via `file://`.
+Quantités entières uniquement ; pas de retours, pertes, TVA, ventes à prix multiples ni valorisation LIFO. Dates en ordre chronologique et pas de fuseaux horaires dans les calculs. Les couleurs de lots sont réutilisées après six lots ; leur numéro distingue toujours les lots. Les exercices ne sont pas un examen sécurisé : les corrections sont présentes côté client et le mot de passe du mode enseignant est lisible dans les sources. Aucun suivi étudiant distant ni export de notes. Le navigateur contrôle le rendu PDF final et la persistance des fichiers ouverts via `file://`.

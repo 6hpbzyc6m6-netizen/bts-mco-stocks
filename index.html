@@ -35,18 +35,22 @@
         <div class="aside-label">VOTRE ESPACE DE TRAVAIL</div>
         <nav aria-label="Navigation principale">
           <button data-view="dashboard" class="active">
-            <span>◫</span> Tableau de bord</button
+            <span>◫</span> Accueil</button
           ><button data-view="movements">
-            <span>⇄</span> Mouvements <b id="movement-count">5</b>
+            <span>⇄</span> 1 · Énoncé <b id="movement-count">5</b>
           </button>
-          <div class="aside-label methods-label">VALORISER LES STOCKS</div>
+          <div class="aside-label methods-label">
+            2 · COMPRENDRE LES MÉTHODES
+          </div>
           <button data-view="moving"><span>01</span> CUMP après entrée</button
           ><button data-view="period">
             <span>02</span> CUMP fin de période</button
           ><button data-view="fifo"><span>03</span> PEPS / FIFO</button
+          ><button data-view="practice">
+            <span>✎</span> 3 · Calculer et vérifier</button
           ><button data-view="compare">
-            <span>▥</span> Comparer les méthodes</button
-          ><button data-view="practice"><span>✎</span> S’entraîner</button>
+            <span>▥</span> 4 · Comparer et conclure
+          </button>
         </nav>
         <div class="aside-note">
           <span class="note-icon">✦</span
@@ -87,9 +91,10 @@
           </div>
           <label class="scenario-select"
             >Charger un exercice<select id="scenario-picker">
-              <option value="0">SPORTÉO · Niveau BTS MCO</option>
-              <option value="1">01 · Débutant</option>
+              <option value="" disabled>Scénario personnalisé</option>
+              <option value="1" selected>01 · Débutant</option>
               <option value="2">02 · Intermédiaire</option>
+              <option value="0">03 · SPORTÉO · BTS MCO</option>
             </select></label
           ><span class="tag" id="level-tag">BTS MCO</span>
         </section>
@@ -134,6 +139,29 @@
           <button type="button" id="cancel" class="button secondary">
             Annuler</button
           ><button type="submit" class="button primary">Enregistrer</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="teacher-dialog" aria-labelledby="teacher-title">
+      <form id="teacher-form">
+        <div class="eyebrow">ACCÈS ENSEIGNANT</div>
+        <h2 id="teacher-title">Ouvrir le mode enseignant</h2>
+        <p>Ce mode affiche immédiatement les corrections des exercices.</p>
+        <label
+          >Mot de passe<input
+            id="teacher-password"
+            type="password"
+            required
+            autocomplete="off"
+            autofocus
+        /></label>
+        <p id="teacher-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button type="button" id="teacher-cancel" class="button secondary">
+            Annuler</button
+          ><button type="submit" class="button primary">
+            Accéder au mode enseignant
+          </button>
         </div>
       </form>
     </dialog>

@@ -1135,3 +1135,175 @@ dialog .actions {
     print-color-adjust: exact;
   }
 }
+
+/* Parcours pédagogique : repères, énoncé partagé et navigation continue. */
+.journey {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 22px;
+  overflow: visible;
+}
+.journey button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 9px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 7px;
+  text-align: left;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+}
+.journey button span {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #edf2e5;
+  color: var(--green);
+}
+.journey button[aria-current="step"] {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
+.journey button[aria-current="step"] span {
+  background: var(--lime);
+  color: var(--ink);
+}
+.welcome {
+  margin-bottom: 22px;
+  background: #edf2e1;
+}
+.welcome p {
+  font-size: 12px;
+  max-width: 720px;
+}
+.welcome .legend {
+  margin-bottom: 0;
+}
+.study-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.65fr);
+  gap: 18px;
+  align-items: start;
+}
+.study-main {
+  min-width: 0;
+}
+.study-main > .panel + .panel {
+  margin-top: 18px;
+}
+.study-main .stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.statement {
+  position: sticky;
+  top: 18px;
+  padding: 18px;
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+}
+.statement h2 {
+  font-size: 15px;
+  margin: 8px 0 15px;
+}
+.statement td,
+.statement th {
+  padding: 10px 6px;
+}
+.statement .legend {
+  line-height: 1.8;
+}
+.calculation-guide h2 {
+  font-size: 16px;
+  margin: 8px 0 12px;
+}
+.calculation-guide ol {
+  font-size: 12px;
+  color: #63775b;
+  padding-left: 22px;
+  line-height: 1.9;
+}
+.method-tabs .button {
+  font-size: 10px;
+}
+.journey-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+.study-layout .practice-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (max-width: 1200px) {
+  .study-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .statement {
+    grid-row: 1;
+    position: static;
+    max-height: 320px;
+  }
+  .journey button {
+    font-size: 10px;
+  }
+  .study-main .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .journey {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .journey button {
+    white-space: normal;
+  }
+  .journey button > span {
+    display: grid;
+  }
+  .study-layout .practice-fields {
+    grid-template-columns: 1fr;
+  }
+  .journey-actions .button {
+    font-size: 10px;
+  }
+  .statement {
+    max-height: 290px;
+  }
+  .journey-actions {
+    align-items: center;
+  }
+}
+@media print {
+  .journey,
+  .journey-actions,
+  .method-tabs,
+  .statement .button {
+    display: none !important;
+  }
+  .study-layout {
+    display: block;
+  }
+  .statement {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    break-inside: avoid;
+    margin-top: 15px;
+  }
+  .study-main .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .calculation-guide {
+    break-inside: avoid;
+  }
+}
