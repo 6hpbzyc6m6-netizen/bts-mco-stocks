@@ -57,7 +57,10 @@ const palette = [
   "#ac6679",
   "#a49c43",
 ];
-let scenario = clone(StockScenarios[0]),
+// Barrière pédagogique côté client, volontairement lisible dans les sources.
+const TEACHER_PASSWORD = "MCO1234";
+let selectedMethod = "moving";
+let scenario = clone(StockScenarios[1]),
   mode = "student",
   view = "dashboard",
   revealed = false,
@@ -114,7 +117,7 @@ function dashboard(r) {
     )}</div>${scenario.movements.length > 8 ? '<p class="legend">Les huit premiers mouvements sont représentés.</p>' : ""}</section><section class="panel tip"><div class="eyebrow">✦ LE REPÈRE À RETENIR</div><h3>La quantité reste. La valeur change.</h3><p>Les méthodes de valorisation donnent la même quantité finale, mais peuvent modifier la valeur du stock et le coût des sorties.</p></section></div>${!visible() ? '<div class="actions" style="margin-top:20px"><button class="button primary" data-view="practice">Commencer un exercice →</button></div>' : ""}`;
 }
 function movements() {
-  return `<section class="panel"><div class="toolbar"><label>Nom du scénario<input id="name-input" maxlength="100" value="${esc(scenario.name)}"></label><label>Prix de vente unitaire HT (€)<input id="sale-input" type="number" min="0" max="1000000000" step="any" placeholder="Facultatif" value="${scenario.salePrice ?? ""}"></label><div class="actions"><button id="add-movement" class="button primary">+ Ajouter</button><button id="export" class="button secondary">Exporter JSON</button><button id="import" class="button secondary">Importer JSON</button></div></div><p class="teacher-note">${mode === "teacher" ? "Mode enseignant sans authentification : cet espace n’est pas privé." : "Vous pouvez modifier les données pour expérimenter."} Les dates sont triées automatiquement ; à date égale, l’ordre des lignes est conservé. Quantités entières.</p><div class="table-wrap"><table><thead><tr><th>Date</th><th>Mouvement</th><th>Quantité</th><th>Coût unitaire HT</th><th>Valeur de l’entrée</th><th>Actions</th></tr></thead><tbody>${scenario.movements.map((m, i) => `<tr><td>${date(m.date)}<small>/${m.date.slice(0, 4)}</small></td><td><span class="type-label ${m.type === "out" ? "out" : ""}">${m.type === "initial" ? "Stock initial" : m.type === "out" ? "Sortie" : "Achat"}</span></td><td>${m.qty}</td><td>${m.type === "out" ? "—" : money(m.cost)}</td><td>${m.type === "out" ? "—" : money(m.qty * m.cost)}</td><td><button class="row-action" data-edit="${i}" aria-label="Modifier la ligne ${i + 1}">Modifier</button>${i ? `<button class="row-action delete" data-delete="${i}" aria-label="Supprimer la ligne ${i + 1}">Supprimer</button>` : ""}</td></tr>`).join("")}</tbody></table></div></section>`;
+  return `<section class="panel"><div class="toolbar"><label>Nom du scénario<input id="name-input" maxlength="100" value="${esc(scenario.name)}"></label><label>Prix de vente unitaire HT (€)<input id="sale-input" type="number" min="0" max="1000000000" step="any" placeholder="Facultatif" value="${scenario.salePrice ?? ""}"></label><div class="actions"><button id="add-movement" class="button primary">+ Ajouter</button><button id="export" class="button secondary">Exporter JSON</button><button id="import" class="button secondary">Importer JSON</button></div></div><p class="teacher-note">${mode === "teacher" ? "Mode enseignant : préparez ou adaptez le scénario ci-dessous." : "Vous pouvez modifier les données pour expérimenter."} Les dates sont triées automatiquement ; à date égale, l’ordre des lignes est conservé. Quantités entières.</p><div class="table-wrap"><table><thead><tr><th>Date</th><th>Mouvement</th><th>Quantité</th><th>Coût unitaire HT</th><th>Valeur de l’entrée</th><th>Actions</th></tr></thead><tbody>${scenario.movements.map((m, i) => `<tr><td>${date(m.date)}<small>/${m.date.slice(0, 4)}</small></td><td><span class="type-label ${m.type === "out" ? "out" : ""}">${m.type === "initial" ? "Stock initial" : m.type === "out" ? "Sortie" : "Achat"}</span></td><td>${m.qty}</td><td>${m.type === "out" ? "—" : money(m.cost)}</td><td>${m.type === "out" ? "—" : money(m.qty * m.cost)}</td><td><button class="row-action" data-edit="${i}" aria-label="Modifier la ligne ${i + 1}">Modifier</button>${i ? `<button class="row-action delete" data-delete="${i}" aria-label="Supprimer la ligne ${i + 1}">Supprimer</button>` : ""}</td></tr>`).join("")}</tbody></table></div></section>`;
 }
 function lotsHTML(lots) {
   return lots.length
@@ -134,7 +137,7 @@ function stockTable(r) {
 function methodView(r) {
   return `<section class="panel"><div class="panel-title"><h2>La méthode, pas à pas</h2><span class="tag">${r.method === "fifo" ? "Lots distincts" : "Coût moyen"}</span></div><div class="explanation">${formula(r.method, r)}</div>${
     !visible()
-      ? `<p>Les données du scénario sont disponibles dans « Mouvements ». Les fiches chiffrées seront accessibles après la correction.</p><button class="button primary" data-view="practice">Saisir mes réponses →</button>`
+      ? `<p>Utilisez l’énoncé affiché à côté et les repères ci-dessous pour préparer vos calculs. Passez ensuite à l’étape 3 pour saisir vos réponses. Les fiches chiffrées seront accessibles après la correction.</p><button class="button primary" data-view="practice">Saisir mes réponses →</button>`
       : `<div class="stats">${stat("Quantité finale", r.qty + "<small>unités</small>", "Stock initial + entrées − sorties")}${stat("Valeur du stock final", money(r.value), "Coût de conservation en stock", true)}${stat("Coût total des sorties", money(r.outValue), r.outQty + " unités sorties")}${stat("Marge brute", r.margin === null ? "—" : money(r.margin), r.margin === null ? "Renseignez un prix dans Mouvements" : "Chiffre d’affaires HT − coût des sorties")}</div><h3>Fiche de stock · ${names[r.method]}</h3>${stockTable(r)}${
           r.method === "fifo"
             ? `<div class="section-title"><h2>Suivre les lots PEPS</h2></div>${r.rows
@@ -176,7 +179,104 @@ function compare(r) {
 }
 function practice(r) {
   let done = Object.keys(progress).filter((k) => progress[k] === true).length;
-  return `<section class="panel"><div class="panel-title"><h2>Votre parcours d’apprentissage</h2><small>Débutant → Intermédiaire → BTS MCO</small></div><p class="legend">Chargez les exercices dans l’ordre 01, 02, puis SPORTÉO. Les acquis sont enregistrés uniquement pour les scénarios prédéfinis, sans modification.</p><div class="progress-track"><span style="width:${(done / 3) * 100}%"></span></div><p class="progress-label">${done} / 3 exercices validés</p></section><section class="panel" style="margin-top:18px"><h2>Quelle valeur reste-t-il en stock ?</h2><p class="legend">Utilisez la chronologie de l’onglet Mouvements. Arrondissez vos montants au centime ; la virgule et le point sont acceptés.</p><form id="answers-form"><label>Quantité finale (unités)<input name="finalQty" type="text" inputmode="numeric" value="${esc(answers.finalQty ?? "")}" required></label>${StockEngine.METHODS.map((m) => `<div class="answer-block"><h3>${names[m]}</h3><div class="practice-fields"><label>Valeur du stock final (€)<input name="${m}-value" inputmode="decimal" value="${esc(answers[m + "-value"] ?? "")}" required></label><label>Coût total des sorties (€)<input name="${m}-outValue" inputmode="decimal" value="${esc(answers[m + "-outValue"] ?? "")}" required></label></div></div>`).join("")}<div class="actions" style="margin-top:20px"><button class="button primary" type="submit">Vérifier mes réponses</button><button type="button" id="show-correction" class="button secondary">Afficher la correction détaillée</button></div></form><div class="feedback" id="feedback" aria-live="polite">${feedback}</div></section>${visible() ? `<section class="panel" style="margin-top:18px"><h2>Correction détaillée</h2><p class="legend">La quantité finale vaut ${scenario.movements.filter((m) => m.type !== "out").reduce((n, m) => n + m.qty, 0)} − ${r.moving.outQty} = ${r.moving.qty} unités.</p>${StockEngine.METHODS.map((m) => `<div class="answer-block"><h3>${names[m]}</h3><div class="explanation">${formula(m, r[m])}</div>${stockTable(r[m])}<p class="legend">Valeur disponible ${money(r[m].totalValue)} = sorties ${money(r[m].outValue)} + stock final ${money(r[m].value)}.</p><button class="button secondary" data-view="${m}">Ouvrir la fiche ${m === "fifo" ? "et les lots" : ""} →</button></div>`).join("")}</section>` : ""}`;
+  return `<section class="panel"><div class="panel-title"><h2>Votre parcours d’apprentissage</h2><small>Débutant → Intermédiaire → BTS MCO</small></div><p class="legend">Chargez les exercices dans l’ordre 01, 02, puis SPORTÉO. Les acquis sont enregistrés uniquement pour les scénarios prédéfinis, sans modification.</p><div class="progress-track"><span style="width:${(done / 3) * 100}%"></span></div><p class="progress-label">${done} / 3 exercices validés</p></section><section class="panel" style="margin-top:18px"><h2>Quelle valeur reste-t-il en stock ?</h2><p class="legend">L’énoncé reste affiché à côté. Calculez la quantité finale, puis les deux montants demandés pour chacune des trois méthodes. Vos réponses sont conservées quand vous changez d’étape. Arrondissez au centime ; la virgule et le point sont acceptés.</p><form id="answers-form"><label>Quantité finale (unités)<input name="finalQty" type="text" inputmode="numeric" value="${esc(answers.finalQty ?? "")}" required></label>${StockEngine.METHODS.map((m) => `<div class="answer-block"><h3>${names[m]}</h3><div class="practice-fields"><label>Valeur du stock final (€)<input name="${m}-value" inputmode="decimal" value="${esc(answers[m + "-value"] ?? "")}" required></label><label>Coût total des sorties (€)<input name="${m}-outValue" inputmode="decimal" value="${esc(answers[m + "-outValue"] ?? "")}" required></label></div></div>`).join("")}<div class="actions" style="margin-top:20px"><button class="button primary" type="submit">Vérifier mes réponses</button><button type="button" id="show-correction" class="button secondary">Afficher la correction détaillée</button></div></form><div class="feedback" id="feedback" aria-live="polite">${feedback}</div></section>${visible() ? `<section class="panel" style="margin-top:18px"><h2>Correction détaillée</h2><p class="legend">La quantité finale vaut ${scenario.movements.filter((m) => m.type !== "out").reduce((n, m) => n + m.qty, 0)} − ${r.moving.outQty} = ${r.moving.qty} unités.</p>${StockEngine.METHODS.map((m) => `<div class="answer-block"><h3>${names[m]}</h3><div class="explanation">${formula(m, r[m])}</div>${stockTable(r[m])}<p class="legend">Valeur disponible ${money(r[m].totalValue)} = sorties ${money(r[m].outValue)} + stock final ${money(r[m].value)}.</p><button class="button secondary" data-view="${m}">Ouvrir la fiche ${m === "fifo" ? "et les lots" : ""} →</button></div>`).join("")}</section>` : ""}`;
+}
+function setMode(nextMode) {
+  mode = nextMode;
+  revealed = false;
+  feedback = "";
+  answers = {};
+  notify(
+    mode === "teacher"
+      ? "Mode enseignant activé : corrections visibles."
+      : "Mode étudiant : les résultats sont masqués.",
+  );
+  render();
+}
+$("#teacher-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if ($("#teacher-password").value !== TEACHER_PASSWORD) {
+    $("#teacher-error").textContent =
+      "Mot de passe incorrect. Réessayez ou revenez au mode étudiant.";
+    $("#teacher-password").value = "";
+    $("#teacher-password").focus();
+    return;
+  }
+  $("#teacher-password").value = "";
+  $("#teacher-dialog").close();
+  setMode("teacher");
+});
+$("#teacher-dialog").addEventListener("close", () => {
+  $("#teacher-password").value = "";
+  $("#teacher-error").textContent = "";
+});
+function journeyStep() {
+  return view === "dashboard"
+    ? 0
+    : view === "movements"
+      ? 1
+      : StockEngine.METHODS.includes(view)
+        ? 2
+        : view === "practice"
+          ? 3
+          : 4;
+}
+function journey() {
+  const current = journeyStep();
+  return `<nav class="journey" aria-label="Parcours de l’exercice">${[
+    ["movements", "Lire l’énoncé"],
+    [selectedMethod, "Comprendre les méthodes"],
+    ["practice", "Calculer et vérifier"],
+    ["compare", "Comparer et conclure"],
+  ]
+    .map(
+      ([target, label], i) =>
+        `<button data-view="${target}" ${current === i + 1 ? 'aria-current="step"' : ""}><span>${i + 1}</span>${label}</button>`,
+    )
+    .join("")}</nav>`;
+}
+function welcome() {
+  return `<section class="panel welcome"><div><div class="eyebrow">VOTRE POINT DE DÉPART</div><h2>Un exercice, du début à la conclusion.</h2><p>Commencez par lire les mouvements, découvrez les trois méthodes, puis calculez et comparez. Le même énoncé vous accompagne à chaque étape.</p></div><button class="button primary" data-view="movements">Commencer avec cet énoncé →</button><p class="legend">Pour débuter, choisissez « 01 · Débutant ». Pour une démonstration corrigée en classe, ouvrez le mode Enseignant.</p></section>`;
+}
+function statement() {
+  return `<section class="panel statement" aria-label="Énoncé de l’exercice"><div class="eyebrow">VOTRE ÉNONCÉ · TOUJOURS SOUS LES YEUX</div><h2>${esc(scenario.name)}</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Opération</th><th>Quantité</th><th>CU HT</th></tr></thead><tbody>${scenario.movements.map((m) => `<tr><td>${date(m.date)}</td><td>${m.type === "initial" ? "Stock initial" : m.type === "purchase" ? "Achat" : "Sortie"}</td><td>${m.qty}</td><td>${m.type === "out" ? "—" : money(m.cost)}</td></tr>`).join("")}</tbody></table></div><p class="legend">${scenario.salePrice == null ? "Prix de vente non renseigné." : `Prix de vente : ${money(scenario.salePrice)} HT / unité.`}</p><p class="legend">À trouver : la quantité finale, la valeur du stock restant et le coût total des sorties.</p><button class="button secondary" data-view="movements">Modifier les données</button></section>`;
+}
+function calculationGuide(method) {
+  const tips = {
+    moving: [
+      "Calculez la valeur du stock initial.",
+      "À chaque achat, additionnez sa valeur à celle du stock restant, puis recalculez le CUMP.",
+      "Valorisez chaque sortie au dernier CUMP connu et mettez le stock à jour.",
+    ],
+    period: [
+      "Additionnez les quantités et valeurs du stock initial et de tous les achats.",
+      "Divisez la valeur totale disponible par la quantité totale disponible.",
+      "Appliquez ce coût unique aux sorties et à la quantité finale.",
+    ],
+    fifo: [
+      "Constituez un lot pour le stock initial et pour chaque achat.",
+      "Pour chaque sortie, prélevez dans le lot le plus ancien ; continuez dans le suivant si nécessaire.",
+      "Additionnez la valeur des prélèvements, puis valorisez les lots restants.",
+    ],
+  };
+  return `<section class="panel calculation-guide"><div class="eyebrow">COMMENT S’Y PRENDRE ?</div><h2>${names[method]}</h2><ol>${tips[method].map((t) => `<li>${t}</li>`).join("")}</ol><div class="actions method-tabs" role="group" aria-label="Explorer une autre méthode">${StockEngine.METHODS.map((m) => `<button class="button ${m === method ? "primary" : "secondary"}" data-view="${m}" aria-pressed="${m === method}">${names[m]}</button>`).join("")}</div></section>`;
+}
+function methodReference() {
+  return `<section class="panel calculation-guide"><h2>Besoin d’un repère pendant le calcul ?</h2><p class="legend">Choisissez une méthode pour revoir ses étapes, sans quitter vos réponses.</p><div class="actions method-tabs" role="group" aria-label="Aide au calcul">${StockEngine.METHODS.map((m) => `<button class="button ${m === selectedMethod ? "primary" : "secondary"}" data-method="${m}" aria-pressed="${m === selectedMethod}">${names[m]}</button>`).join("")}</div><div class="explanation">${formula(selectedMethod, StockEngine.calculate(scenario, selectedMethod))}</div></section>`;
+}
+function journeyActions() {
+  const step = journeyStep();
+  const previous = [null, "dashboard", "movements", selectedMethod, "practice"][
+    step
+  ];
+  const next = ["movements", selectedMethod, "practice", "compare", null][step];
+  const labels = [
+    "Lire l’énoncé",
+    "Comprendre les méthodes",
+    "Saisir mes réponses",
+    "Comparer les résultats",
+  ];
+  return `<div class="journey-actions">${previous ? `<button class="button secondary" data-view="${previous}">← Étape précédente</button>` : "<span></span>"}${next ? `<button class="button primary" data-view="${next}">${labels[step]} →</button>` : '<button class="button secondary" data-view="dashboard">Revenir à l’accueil</button>'}</div>`;
 }
 function render() {
   const r = results();
@@ -205,7 +305,7 @@ function render() {
   document
     .querySelectorAll("nav [data-view]")
     .forEach((b) => b.classList.toggle("active", b.dataset.view === view));
-  $("#content").innerHTML =
+  const body =
     view === "dashboard"
       ? dashboard(r)
       : view === "movements"
@@ -215,6 +315,21 @@ function render() {
           : view === "practice"
             ? practice(r)
             : methodView(r[view]);
+  const withStatement =
+    StockEngine.METHODS.includes(view) || view === "practice";
+  $("#content").innerHTML =
+    journey() +
+    (view === "dashboard" ? welcome() : "") +
+    (withStatement
+      ? `<div class="study-layout"><section class="study-main">${view === "practice" ? methodReference() : calculationGuide(view)}${body}</section>${statement()}</div>`
+      : body) +
+    journeyActions();
+  const match = StockScenarios.findIndex(
+    (s) =>
+      s.name === scenario.name &&
+      JSON.stringify(s.movements) === JSON.stringify(scenario.movements),
+  );
+  $("#scenario-picker").value = match < 0 ? "" : String(match);
 }
 function invalidate() {
   revealed = false;
@@ -281,24 +396,31 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.view) {
+    captureAnswers();
     view = b.dataset.view;
+    if (StockEngine.METHODS.includes(view)) selectedMethod = view;
     notify("");
+    render();
+    $("#main").focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+  if (b.dataset.method) {
+    captureAnswers();
+    selectedMethod = b.dataset.method;
     render();
     return;
   }
   if (b.dataset.mode) {
-    mode = b.dataset.mode;
-    revealed = false;
-    feedback = "";
-    answers = {};
-    notify(
-      mode === "teacher"
-        ? "Mode enseignant : corrections visibles. Cet espace est accessible sans authentification."
-        : "Mode étudiant : les résultats sont masqués.",
-    );
-    render();
+    if (b.dataset.mode === mode) return;
+    if (b.dataset.mode === "teacher") {
+      $("#teacher-form").reset();
+      $("#teacher-error").textContent = "";
+      $("#teacher-dialog").showModal();
+    } else setMode("student");
     return;
   }
+  if (b.id === "teacher-cancel") $("#teacher-dialog").close();
   if (b.dataset.edit !== undefined) openMovement(Number(b.dataset.edit));
   if (b.dataset.delete !== undefined) {
     const next = clone(scenario);
