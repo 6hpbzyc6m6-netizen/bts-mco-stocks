@@ -50,6 +50,12 @@ class Tests(unittest.TestCase):
             m=s.saisir()
         self.assertEqual(m,[(0,10,200),(1,5,300),(2,6,0)])
 
+    def test_script_complet_et_compact(self):
+        source = pathlib.Path(s.__file__).read_bytes()
+        self.assertLess(len(source), 8000)
+        self.assertTrue(source.rstrip().endswith(b'# FIN DU SCRIPT - stocks()'))
+        self.assertIn(b'def stocks():', source)
+
     def test_arrondi_exact(self):
         self.assertEqual(s.montant((1,2)), '0.01')
         self.assertEqual(s.montant((1,3)), '0.00')

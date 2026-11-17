@@ -55,8 +55,20 @@ Depuis la racine du dépôt :
 python3 -m unittest discover -s numworks -p 'test_*.py' -v
 ```
 
-Cinq tests automatisés CPython réussis : résultats SPORTÉO et lots PEPS ; conservation exacte des valeurs et quantités sur plusieurs cas (stock nul, coûts identiques et variables, sorties multi-lots, réapprovisionnement) ; validation ; saisie interactive simulée sans données préchargées ; arrondi et analyse syntaxique Python 3.4.
+Six tests automatisés CPython réussis : résultats SPORTÉO et lots PEPS ; conservation exacte des valeurs et quantités sur plusieurs cas (stock nul, coûts identiques et variables, sorties multi-lots, réapprovisionnement) ; validation ; saisie interactive simulée sans données préchargées ; arrondi et analyse syntaxique Python 3.4 ; taille du fichier et présence du repère de fin.
+
+La source complète a aussi été compilée avec `mpy-cross` MicroPython 1.17 : compilation réussie. Ce contrôle vérifie la syntaxe MicroPython, pas l’exécution ni l’affichage sur calculatrice.
 
 SPORTÉO n’apparaît que dans les tests sur ordinateur, jamais dans le script élève. Résultats de contrôle : 402,50 € (CUMP mobile), 396,67 € (CUMP période), 425 € (PEPS), avec 35 unités finales.
 
 **Limite de vérification : pas de test exécuté sur une NumWorks réelle ou son émulateur.** La syntaxe compatible ne garantit pas à elle seule le comportement et la mémoire disponible sur chaque version de la calculatrice. Un essai sur une calculatrice est nécessaire avant diffusion à toute la classe.
+
+## Si « SyntaxError » apparaît à l’import
+
+Une erreur à une ligne de texte ne signifie pas forcément que cette ligne est fautive : un guillemet ou une parenthèse peut manquer juste avant, ou le transfert peut être incomplet. Le fichier d’origine dépassait 9 Ko ; la version compacte fait moins de 8 Ko. Ce seuil est une précaution de transfert, pas une limite universelle affirmée pour NumWorks.
+
+1. Remplacer **tout** le contenu de l’ancien script par la nouvelle source (bouton Raw / Brut sur GitHub, sans les numéros de ligne ni les balises Markdown).
+2. Vérifier dans l’éditeur que la dernière ligne est exactement `# FIN DU SCRIPT - stocks()`.
+3. Enregistrer puis transférer à nouveau le script entier.
+4. Si le nom est `stock.py`, saisir `from stock import *`, puis `stocks()`. Si le nom est `stocks.py`, saisir `from stocks import *`, puis `stocks()`.
+5. Si l’erreur persiste, transmettre le fichier réellement présent dans l’éditeur ou une capture des lignes précédant et suivant la ligne indiquée. Une capture du message seul ne permet pas de vérifier le contenu transféré.
