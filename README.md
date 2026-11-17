@@ -2,6 +2,10 @@
 
 Application pédagogique autonome, en français, pour comprendre et comparer la valorisation des stocks. HTML5, CSS3 et JavaScript natif : aucune dépendance, API, base de données ou authentification.
 
+## Version NumWorks
+
+Le dossier [`numworks/`](numworks/README.md) contient un script Python autonome, sans exercice préchargé, pour saisir ses propres mouvements et obtenir les résultats des trois méthodes sur la calculatrice. Cette version est indépendante de l’application web et ne lit pas ses sauvegardes.
+
 ## Utilisation
 
 Ouvrir `index.html` directement dans un navigateur récent, y compris hors connexion. Un serveur local facultatif est disponible avec Node.js 18 ou supérieur : `npm start`, puis ouvrir http://127.0.0.1:8000.
