@@ -60,6 +60,7 @@ const palette = [
 // Barrière pédagogique côté client, volontairement lisible dans les sources.
 const TEACHER_PASSWORD = "MCO1234";
 let selectedMethod = "moving";
+const calculator = { expression: "", result: null, error: "" };
 let scenario = clone(StockScenarios[1]),
   mode = "student",
   view = "dashboard",
@@ -239,8 +240,78 @@ function welcome() {
   return `<section class="panel welcome"><div><div class="eyebrow">VOTRE POINT DE DÉPART</div><h2>Un exercice, du début à la conclusion.</h2><p>Commencez par lire les mouvements, découvrez les trois méthodes, puis calculez et comparez. Le même énoncé vous accompagne à chaque étape.</p></div><button class="button primary" data-view="movements">Commencer avec cet énoncé →</button><p class="legend">Pour débuter, choisissez « 01 · Débutant ». Pour une démonstration corrigée en classe, ouvrez le mode Enseignant.</p></section>`;
 }
 function statement() {
-  return `<section class="panel statement" aria-label="Énoncé de l’exercice"><div class="eyebrow">VOTRE ÉNONCÉ · TOUJOURS SOUS LES YEUX</div><h2>${esc(scenario.name)}</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Opération</th><th>Quantité</th><th>CU HT</th></tr></thead><tbody>${scenario.movements.map((m) => `<tr><td>${date(m.date)}</td><td>${m.type === "initial" ? "Stock initial" : m.type === "purchase" ? "Achat" : "Sortie"}</td><td>${m.qty}</td><td>${m.type === "out" ? "—" : money(m.cost)}</td></tr>`).join("")}</tbody></table></div><p class="legend">${scenario.salePrice == null ? "Prix de vente non renseigné." : `Prix de vente : ${money(scenario.salePrice)} HT / unité.`}</p><p class="legend">À trouver : la quantité finale, la valeur du stock restant et le coût total des sorties.</p><button class="button secondary" data-view="movements">Modifier les données</button></section>`;
+  return `<section class="panel statement" aria-label="Énoncé de l’exercice"><div class="eyebrow">VOTRE ÉNONCÉ · TOUJOURS SOUS LES YEUX</div><h2>${esc(scenario.name)}</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Opération</th><th>Quantité</th><th>CU HT</th></tr></thead><tbody>${scenario.movements.map((m) => `<tr><td>${date(m.date)}</td><td>${m.type === "initial" ? "Stock initial" : m.type === "purchase" ? "Achat" : "Sortie"}</td><td>${m.qty}</td><td>${m.type === "out" ? "—" : money(m.cost)}</td></tr>`).join("")}</tbody></table></div><p class="legend">${scenario.salePrice == null ? "Prix de vente non renseigné." : `Prix de vente : ${money(scenario.salePrice)} HT / unité.`}</p><p class="legend">À trouver : la quantité finale, la valeur du stock restant et le coût total des sorties.</p><button class="button secondary" data-view="movements">Modifier les données</button>${calculatorHTML()}</section>`;
 }
+function calculatorHTML() {
+  return `<section class="calculator" aria-labelledby="calculator-title"><h3 id="calculator-title">Calculatrice</h3><p class="legend">Posez vos calculs ici, puis reportez vos résultats dans les réponses.</p><form id="calculator-form"><label for="calculator-input">Votre calcul</label><input id="calculator-input" type="text" inputmode="text" maxlength="200" autocomplete="off" spellcheck="false" placeholder="Ex. : (400 + 260) / 60" value="${esc(calculator.expression)}" aria-describedby="calculator-help"><output id="calculator-result" aria-live="polite">${calculator.result === null ? "" : esc(calculatorDisplay())}</output><p id="calculator-error" class="error" role="alert">${esc(calculator.error)}</p><div class="calculator-keys">${[
+    ["clear", "C", "Tout effacer"],
+    ["(", "(", "Parenthèse ouvrante"],
+    [")", ")", "Parenthèse fermante"],
+    ["backspace", "⌫", "Effacer le dernier caractère"],
+    ["7", "7"],
+    ["8", "8"],
+    ["9", "9"],
+    ["/", "÷", "Diviser"],
+    ["4", "4"],
+    ["5", "5"],
+    ["6", "6"],
+    ["*", "×", "Multiplier"],
+    ["1", "1"],
+    ["2", "2"],
+    ["3", "3"],
+    ["-", "−", "Soustraire"],
+    ["0", "0"],
+    [",", ",", "Virgule"],
+    ["equals", "=", "Calculer"],
+    ["+", "+", "Additionner"],
+  ]
+    .map(
+      ([key, label, aria]) =>
+        `<button type="button" data-calc="${key}" aria-label="${aria || label}" class="${key === "equals" ? "calc-equals" : ""}">${label}</button>`,
+    )
+    .join(
+      "",
+    )}</div><button type="button" id="calculator-reuse" class="button secondary" ${calculator.result === null ? "disabled" : ""}>Réutiliser le résultat</button><p id="calculator-help" class="legend">Clavier ou boutons · Entrée pour calculer. Virgule et point acceptés. Les parenthèses et priorités opératoires sont respectées. Affichage à 12 chiffres significatifs ; résultat conservé sans arrondi intermédiaire.</p></form></section>`;
+}
+function calculatorDisplay() {
+  return new Intl.NumberFormat("fr-FR", {
+    useGrouping: false,
+    maximumSignificantDigits: 12,
+  }).format(calculator.result);
+}
+function updateCalculator() {
+  $("#calculator-input").value = calculator.expression;
+  $("#calculator-result").textContent =
+    calculator.result === null ? "" : calculatorDisplay();
+  $("#calculator-error").textContent = calculator.error;
+  $("#calculator-reuse").disabled = calculator.result === null;
+}
+function runCalculator() {
+  calculator.expression = $("#calculator-input").value;
+  try {
+    calculator.result = StockCalculator.calculate(calculator.expression);
+    calculator.error = "";
+  } catch (error) {
+    calculator.result = null;
+    calculator.error = error.message;
+  }
+  updateCalculator();
+}
+// Ne pas recalculer ni recréer le formulaire de réponses en utilisant le clavier.
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "calculator-input") return;
+  calculator.expression = e.target.value;
+  calculator.result = null;
+  calculator.error = "";
+  $("#calculator-result").textContent = "";
+  $("#calculator-error").textContent = "";
+  $("#calculator-reuse").disabled = true;
+});
+document.addEventListener("submit", (e) => {
+  if (e.target.id !== "calculator-form") return;
+  e.preventDefault();
+  runCalculator();
+});
 function calculationGuide(method) {
   const tips = {
     moving: [
@@ -395,6 +466,33 @@ function exportJSON() {
 document.addEventListener("click", (e) => {
   const b = e.target.closest("button");
   if (!b) return;
+  if (b.dataset.calc !== undefined || b.id === "calculator-reuse") {
+    const input = $("#calculator-input");
+    const key = b.dataset.calc;
+    if (key === "equals") {
+      runCalculator();
+      return;
+    }
+    if (b.id === "calculator-reuse") {
+      if (calculator.result === null) return;
+      input.value = String(calculator.result).replace(".", ",");
+    } else if (key === "clear") input.value = "";
+    else {
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? start;
+      const from =
+        key === "backspace" && start === end ? Math.max(0, start - 1) : start;
+      const text = key === "backspace" ? "" : key;
+      if (input.value.length - (end - from) + text.length > 200) return;
+      input.setRangeText(text, from, end, "end");
+    }
+    calculator.expression = input.value;
+    calculator.result = null;
+    calculator.error = "";
+    updateCalculator();
+    input.focus();
+    return;
+  }
   if (b.dataset.view) {
     captureAnswers();
     view = b.dataset.view;

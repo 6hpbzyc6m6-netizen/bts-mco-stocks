@@ -23,6 +23,10 @@ L’accueil mène à quatre étapes : lire l’énoncé, comprendre les méthode
 
 L’énoncé est affiché à côté des méthodes et de la saisie des réponses (au-dessus sur petit écran). Chaque méthode dispose de repères de calcul. Dans l’étape de saisie, une aide permet de revoir les formules sans quitter les réponses. Celles-ci sont conservées en mémoire lors des changements de vue ; elles restent réinitialisées si le scénario ou le mode change. Rien n’est transmis au professeur.
 
+### Calculatrice intégrée
+
+Sous l’énoncé, une calculatrice permet les quatre opérations, les parenthèses, la saisie au clavier (Entrée pour calculer), les boutons, la virgule ou le point et la réutilisation du résultat. Elle respecte les priorités opératoires, signale les calculs incomplets et divisions par zéro et conserve le calcul courant pendant la navigation, sans modifier les réponses. L’affichage est limité à 12 chiffres significatifs, le résultat interne n’est pas arrondi. Aucun code saisi n’est exécuté. La calculatrice est masquée à l’impression.
+
 ## Calculs
 
 `engine.js` expose `StockEngine.validate(scenario)` et `StockEngine.calculate(scenario, method)` dans le navigateur, et les mêmes fonctions via CommonJS pour les tests. Le moteur est pur et ne modifie pas les mouvements.
@@ -79,6 +83,7 @@ Dépôt cible uniquement : https://github.com/6hpbzyc6m6-netizen/bts-mco-stocks
 - `engine.js` : validation et moteur des trois calculs.
 - `scenarios.js` : trois exercices prédéfinis.
 - `app.js` : rendu, deux modes, corrections, import/export et persistance.
+- `calculator.js`, `tests/calculator.test.cjs` : calcul arithmétique de la calculatrice et tests.
 - `tests/engine.test.cjs` : tests automatisés du moteur.
 - `tests/interface.test.cjs` : tests des événements de verrouillage, du parcours et de la conservation des réponses (DOM simulé, sans contrôle visuel).
 - `package.json`, `scripts/serve.cjs` : commandes de tests et serveur local facultatif.
